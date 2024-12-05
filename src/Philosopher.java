@@ -1,38 +1,58 @@
-public class Philosoph {
-    private boolean eat;
-    private boolean think;
-    private boolean leftHand;
-    private boolean rightHand = true;
+import java.util.concurrent.CountDownLatch;
 
-    public boolean isEat() {
-        return eat;
+public class Philosopher extends Thread {
+    int id;
+    int leftID;
+    CountDownLatch eaten;
+    int countEat = 0;
+    Table table;
+
+    public Philosopher(CountDownLatch eaten, int id, int leftID, Table table) {
+        this.id = id;
+        this.eaten = eaten;
+        this.leftID = leftID;
+        this.table = table;
     }
 
-    public boolean isThink() {
-        return think;
+    private void think() throws InterruptedException {
+        System.out.println("Философ " + id + " размышляет");
+        sleep(1000);
     }
 
-    public void setEat(boolean eat) {
-        this.eat = eat;
+    private void eat() throws InterruptedException {
+        try {
+            if (table.tryGetForks(id, leftID)){
+            System.out.println("Философ " + id + " начал есть");
+            sleep(1000);
+            System.out.println("Философ " + id + " поел");
+            table.putForks(id, leftID);
+            countEat++;}
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void setThink(boolean think) {
-        this.think = think;
+    @Override
+    public void run() {
+        while (countEat < 3) {
+            try {
+                eat();
+
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (eaten.getCount() != 0) {
+                try {
+                    think();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }eaten.countDown();
+        }
+
     }
 
-    public boolean isLeftHand() {
-        return leftHand;
-    }
 
-    public boolean isRightHand() {
-        return rightHand;
-    }
-
-    public void setLeftHand(boolean leftHand) {
-        this.leftHand = leftHand;
-    }
-
-    public void setRightHand(boolean rightHand) {
-        this.rightHand = rightHand;
-    }
 }
