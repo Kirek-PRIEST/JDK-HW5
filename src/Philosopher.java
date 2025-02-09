@@ -20,25 +20,22 @@ public class Philosopher extends Thread {
     }
 
     private void eat() throws InterruptedException {
-        try {
-            if (table.tryGetForks(id, leftID)){
+        if (table.tryGetForks(id, leftID)) {
             System.out.println("Философ " + id + " начал есть");
             sleep(1000);
             System.out.println("Философ " + id + " поел");
             table.putForks(id, leftID);
-            countEat++;}
-
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            countEat++;
         }
+
     }
+
 
     @Override
     public void run() {
         while (countEat < 3) {
             try {
                 eat();
-
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -49,10 +46,10 @@ public class Philosopher extends Thread {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-            }eaten.countDown();
+            }
+
         }
-
+        eaten.countDown();
     }
-
-
 }
+
